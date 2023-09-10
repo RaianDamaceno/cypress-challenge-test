@@ -5,7 +5,7 @@ export function register(user, password) {
         .should('be.visible')
         .click()
 
-    cy.get(locators.fieldSignUsername)
+    cy.get(locators.fieldSignUsername, { delay: 2 })
         .should('be.visible')
         .type(user)
 
@@ -27,11 +27,11 @@ export function createLogin(user, password) {
     .should('be.visible')
     .click()
 
-    cy.get(locators.fieldLoginUserName)
+    cy.get(locators.fieldLoginUserName,{ delay: 10 })
         .should('be.visible')
         .type(user)
 
-    cy.get(locators.fieldLoginPassword)
+    cy.get(locators.fieldLoginPassword,{ delay: 10 })
         .should('be.visible')
         .type(password)
 
@@ -55,7 +55,39 @@ export function logout() {
     cy.url().should('include', '/index')
 }
 
-export function selectProduct(productName) {
+export function AddProdutctToCart(productName, productID) {
     cy.get(`[onclick="byCat('${productName}')"]`)
+        .click()
+
+    cy.get(`[href="prod.html?idp_=${productID}"]`)
+        .first()
+        .click()
+    
+    cy.contains('Add to cart')
+        .click()
+}
+
+export function goToHome() {
+    cy.get(locators.btnHome)
+        .should('be.visible')
+        .first()
+        .click()
+}
+
+export function goToCart() {
+    cy.get(locators.goToCart)
+        .should('be.visible')
+        .first()
+        .click()
+}
+
+export function deleteItem() {
+    cy.contains('Delete')
+        .first()
+        .click()
+}
+
+export function placeOrder() {
+    cy.get('[data-target="#orderModal"]')
         .click()
 }
