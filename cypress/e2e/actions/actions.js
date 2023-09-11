@@ -5,44 +5,73 @@ export function register(user, password) {
         .should('be.visible')
         .click()
 
-    cy.get(locators.fieldSignUsername, { delay: 2 })
+    cy.wait(2000)
+    cy.get(locators.fieldSignUsername)
         .should('be.visible')
+        .should('be.enabled')
         .type(user)
 
     cy.get(locators.fieldSignPassword)
         .should('be.visible')
+        .should('be.enabled')
         .type(password)
 
     cy.get('#signInModal > .modal-dialog > .modal-content > .modal-footer > .btn-primary')
         .click()
-
-    cy.wait(2000)
 
     cy.get('#signInModal > .modal-dialog > .modal-content > .modal-footer > .btn-secondary')
         .click()
 }
 
 export function createLogin(user, password) {
+   cy.intercept('GET', '/login').as('apiRequest');
    cy.get(locators.btnLogin)
     .should('be.visible')
     .click()
-
-    cy.get(locators.fieldLoginUserName,{ delay: 10 })
+    cy.wait(2000)
+    cy.get(locators.fieldLoginUserName)
         .should('be.visible')
+        .should('be.enabled')
         .type(user)
 
-    cy.get(locators.fieldLoginPassword,{ delay: 10 })
+    cy.get(locators.fieldLoginPassword)
         .should('be.visible')
+        .should('be.enabled')
         .type(password)
 
     cy.get('#logInModal > .modal-dialog > .modal-content > .modal-footer > .btn-primary')
         .click()
-}
-
-export function checkLoginSucess() {
+    
     cy.get(locators.nameOfUserElement)
         .should('be.visible')
 }
+
+export function createInvalidLogin(user, password) {
+    cy.intercept('POST', '/login').as('apiRequest');
+
+    cy.get(locators.btnLogin)
+     .should('be.visible')
+     .click()
+ 
+     cy.get(locators.fieldLoginUserName)
+         .should('be.visible')
+         .should('be.enabled')
+         .type(user)
+ 
+     cy.get(locators.fieldLoginPassword)
+         .should('be.visible')
+         .should('be.enabled')
+         .type(password)
+ 
+     cy.get('#logInModal > .modal-dialog > .modal-content > .modal-footer > .btn-primary')
+         .click()
+     
+    cy.wait('@apiRequest').then((interception) => {
+        const ApiResponse = interception.response.body;
+        cy.log(ApiResponse)
+        expect(ApiResponse.errorMessage).to.equal("Wrong password.")
+    });
+ }
 
 export function logout() {
     cy.get(locators.btnLogout)
@@ -75,6 +104,7 @@ export function goToHome() {
 }
 
 export function goToCart() {
+
     cy.get(locators.goToCart)
         .should('be.visible')
         .first()
@@ -82,9 +112,15 @@ export function goToCart() {
 }
 
 export function deleteItem() {
+    cy.intercept('POST', '/deleteitem').as('apiRequestDelete');
     cy.contains('Delete')
         .first()
         .click()
+
+    cy.wait('@apiRequestDelete').then((interception) => {
+        const ApiResponse = interception.response.statusCode;
+        expect(ApiResponse).to.equal(200);
+    });
 }
 
 export function placeOrder() {
